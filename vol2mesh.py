@@ -39,7 +39,7 @@ def findBBDimensions(listOfPixels):
 	return [minxs, maxxs+1, minys, maxys+1, minzs, maxzs+1], [dx, dy, dz]
 
 def calcMeshWithCrop(stackname, labelStack, location, simplify, tags):
-	print str(tags['downsample_interval_x'])
+	print(str(tags['downsample_interval_x']))
 	SCALEX = tags['downsample_interval_x']
 	SCALEY = tags['downsample_interval_x']
 	SCALEZ = tags['downsample_interval_x']
@@ -79,7 +79,7 @@ def calcMeshWithCrop(stackname, labelStack, location, simplify, tags):
 	subprocess.call(s, shell=True)
 
 def calcMesh(stackname, labelStack, location, simplify, tags):
-	print str(tags['downsample_interval_x'])
+	print(str(tags['downsample_interval_x']))
 	SCALEX = float(tags['downsample_interval_x']) + 1.0
 	SCALEY = float(tags['downsample_interval_x']) + 1.0
 	SCALEZ = float(tags['downsample_interval_x']) + 1.0
@@ -90,9 +90,9 @@ def calcMesh(stackname, labelStack, location, simplify, tags):
 		f.write("# OBJ file\n")
 
 		for v in vertices:
-			xx = ((float(tags['dvid_offset_x']) + v[0]) * SCALEX)
+			xx = ((float(tags['dvid_offset_x']) + v[2]) * SCALEX)
 			yy = ((float(tags['dvid_offset_y']) + v[1]) * SCALEY)
-			zz = ((float(tags['dvid_offset_z']) + v[2]) * SCALEZ)
+			zz = ((float(tags['dvid_offset_z']) + v[0]) * SCALEZ)
 			f.write("v %.3f %.3f %.3f \n" % (xx, yy, zz))
 		#for n in normals:
 		#	f.write("vn %.2f %.2f %.2f \n" % (n[2], n[1], n[0]))
@@ -117,30 +117,30 @@ def getTagDictionary(stack):
 	for page in tif.pages:
 		try:
 			tagDict['dvid_offset_x'] = page.tags['31232'].value
-		except KeyError, e:
+		except KeyError as e:
 			pass
 		try:
 			tagDict['dvid_offset_y'] = page.tags['31233'].value
-		except KeyError, e:
+		except KeyError as e:
 			pass
 		try:
 			tagDict['dvid_offset_z'] = page.tags['31234'].value
-		except KeyError, e:
+		except KeyError as e:
 			pass
 		try:
 			tagDict['downsample_interval_x'] = page.tags['31235'].value
-		except KeyError, e:
+		except KeyError as e:
 			pass
 	if 'downsample_interval_x' not in tagDict:
 		tagDict['downsample_interval_x'] = 1.0
 	if 'dvid_offset_x' not in tagDict:
-		print "Offset not found, bad TIFF, quitting."
+		print("Offset not found, bad TIFF, quitting.")
 		sys.exit()
 	if 'dvid_offset_y' not in tagDict:
-		print "Offset not found, bad TIFF, quitting."
+		print("Offset not found, bad TIFF, quitting.")
 		sys.exit()
 	if 'dvid_offset_z' not in tagDict:
-		print "Offset not found, bad TIFF, quitting."
+		print("Offset not found, bad TIFF, quitting.")
 		sys.exit()
 	
 	return tagDict
