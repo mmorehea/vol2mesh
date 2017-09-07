@@ -4,9 +4,6 @@ import tifffile
 import numpy as np
 import glob
 from numpy import load
-from sets import Set
-
-from multiprocessing.dummy import Pool as ThreadPool
 import subprocess
 import threading
 import os
