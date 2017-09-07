@@ -61,7 +61,7 @@ def calcMeshWithCrop(stackname, labelStack, location, simplify, tags):
 		for v in vertices:
 			f.write("v %.2f %.2f %.2f \n" % ((box[0] * SCALEX) + ((float(tags['dvid_offset_x']) + v[0]) * SCALEX), (box[2] * SCALEY) + ((float(tags['dvid_offset_x']) + v[1]) * SCALEY), (box[4] * SCALEZ) + (float(tags['dvid_offset_x']) + v[2]) * SCALEZ))
 		#for n in normals:
-		#	f.write("vn %.2f %.2f %.2f \n" % (n[2], n[1], n[0]))
+			#f.write("vn -1 -1 -1 \n")# % (n[2], n[1], n[0]))
 		for face in faces:
 			f.write("f %d %d %d \n" % (face[2]+1, face[1]+1, face[0]+1))
 	print("Decimating Mesh...")
@@ -94,7 +94,7 @@ def calcMesh(stackname, labelStack, location, simplify, tags):
 		#for n in normals:
 		#	f.write("vn %.2f %.2f %.2f \n" % (n[2], n[1], n[0]))
 		for face in faces:
-			f.write("f %d %d %d \n" % (face[2]+1, face[1]+1, face[0]+1))
+			f.write("f %d %d %d \n" % (face[0]+1, face[1]+1, face[2]+1))
 	print("Decimating Mesh...")
 	if os.name == 'nt':
 		s = './binWindows/simplify ./' + location + os.path.basename(stackname) +".obj ./" + location + os.path.basename(stackname) +".smooth.obj " + str(simplify)
