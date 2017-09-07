@@ -77,9 +77,8 @@ def calcMeshWithCrop(stackname, labelStack, location, simplify, tags):
 
 def calcMesh(stackname, labelStack, location, simplify, tags):
 	print(str(tags['downsample_interval_x']))
-	SCALEX = float(tags['downsample_interval_x'])
-	SCALEY = float(tags['downsample_interval_x'])
-	SCALEZ = float(tags['downsample_interval_x'])
+	downsampleFactor = float(tags['downsample_interval_x'])
+
 
 	print("Building mesh...")
 	vertices, normals, faces = march(labelStack.transpose(), 3)  # zero smoothing rounds
@@ -87,17 +86,17 @@ def calcMesh(stackname, labelStack, location, simplify, tags):
 		f.write("# OBJ file\n")
 
 		for v in vertices:
-			xx = ((float(tags['dvid_offset_x']) + v[2]) * SCALEX)
-			yy = ((float(tags['dvid_offset_y']) + v[1]) * SCALEY)
-			zz = ((float(tags['dvid_offset_z']) + v[0]) * SCALEZ)
-			f.write("v %.3f %.3f %.3f \n" % (xx, yy, zz))
+			xx = ((float(tags['dvid_offset_x']) + v[0]) * downsampleFactor)
+			yy = ((float(tags['dvid_offset_y']) + v[1]) * downsampleFactor)
+			zz = ((float(tags['dvid_offset_z']) + v[2]) * downsampleFactor)
+			f.write("v %.3f %.3f %.3f \n" % (zz, yy, xx))
 		#for n in normals:
 		#	f.write("vn %.2f %.2f %.2f \n" % (n[2], n[1], n[0]))
 		for face in faces:
 			f.write("f %d %d %d \n" % (face[0]+1, face[1]+1, face[2]+1))
 	print("Decimating Mesh...")
 	if os.name == 'nt':
-		s = './binWindows/simplify ./' + location + os.path.basename(stackname) +".obj ./" + location + os.path.basename(stackname) +".smooth.obj " + str(simplify)
+		s = 'binWindows\\simplify.exe ' + location[:-1] + '\\' + os.path.basename(stackname) +".obj " + location[:-1] + '\\' + os.path.basename(stackname) +".smooth.obj " + str(simplify)
 	else:
 		if platform.system() == "Darwin":
 			s = './binOSX/simplify ./' + location + os.path.basename(stackname) +".obj ./" + location + os.path.basename(stackname) +".smooth.obj " + str(simplify)
