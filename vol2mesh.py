@@ -80,9 +80,9 @@ def calcMeshWithCrop(stackname, labelStack, location, simplify, tags):
 
 def calcMesh(stackname, labelStack, location, simplify, tags):
 	print(str(tags['downsample_interval_x']))
-	SCALEX = float(tags['downsample_interval_x']) + 1.0
-	SCALEY = float(tags['downsample_interval_x']) + 1.0
-	SCALEZ = float(tags['downsample_interval_x']) + 1.0
+	SCALEX = float(tags['downsample_interval_x'])
+	SCALEY = float(tags['downsample_interval_x'])
+	SCALEZ = float(tags['downsample_interval_x'])
 
 	print("Building mesh...")
 	vertices, normals, faces = march(labelStack.transpose(), 3)  # zero smoothing rounds
@@ -117,6 +117,7 @@ def getTagDictionary(stack):
 	for page in tif.pages:
 		try:
 			tagDict['dvid_offset_x'] = page.tags['31232'].value
+
 		except KeyError as e:
 			pass
 		try:
@@ -128,7 +129,7 @@ def getTagDictionary(stack):
 		except KeyError as e:
 			pass
 		try:
-			tagDict['downsample_interval_x'] = page.tags['31235'].value
+			tagDict['downsample_interval_x'] = float(page.tags['31235'].value) + 1.0
 		except KeyError as e:
 			pass
 	if 'downsample_interval_x' not in tagDict:
@@ -142,7 +143,7 @@ def getTagDictionary(stack):
 	if 'dvid_offset_z' not in tagDict:
 		print("Offset not found, bad TIFF, quitting.")
 		sys.exit()
-	
+
 	return tagDict
 
 
