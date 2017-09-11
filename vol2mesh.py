@@ -78,25 +78,31 @@ def calcMeshWithCrop(stackname, labelStack, location, simplify, tags):
 def calcMesh(stackname, labelStack, location, simplify, tags):
 	print(str(tags['downsample_interval_x']))
 	downsampleFactor = float(tags['downsample_interval_x'])
-
-
+	xOffset = float(tags['dvid_offset_x'])
+	yOffset = float(tags['dvid_offset_y'])
+	zOffset = float(tags['dvid_offset_z'])
+	
+	labelStack = np.swapaxes(labelStack, 0, 2)
 	print("Building mesh...")
-	vertices, normals, faces = march(labelStack.transpose(), 3)  # zero smoothing rounds
+	vertices, normals, faces = march(labelStack, 3)  # 3 smoothing rounds
+	
+	print('preparing vertices and faces...')
+	newVerts = [[((xOffset + i[0]) * downsampleFactor),  ((yOffset + i[1]) * downsampleFactor), ((zOffset + i[2]) * downsampleFactor)] for i in vertices]
+	vertStrings = ["v %.3f %.3f %.3f \n" % (i[0], i[1], i[2]) for i in newVerts]
+	faceStrings = ["f %d %d %d \n" % (face[2]+1, face[1]+1, face[0]+1) for face in faces]
 	with open(location + os.path.basename(stackname) +".obj", 'w') as f:
 		f.write("# OBJ file\n")
-
-		for v in vertices:
-			xx = ((float(tags['dvid_offset_x']) + v[0]) * downsampleFactor)
-			yy = ((float(tags['dvid_offset_y']) + v[1]) * downsampleFactor)
-			zz = ((float(tags['dvid_offset_z']) + v[2]) * downsampleFactor)
-			f.write("v %.3f %.3f %.3f \n" % (zz, yy, xx))
+		
+		print("writing vertices...")
+		f.write(''.join(vertStrings))
 		#for n in normals:
 		#	f.write("vn %.2f %.2f %.2f \n" % (n[2], n[1], n[0]))
-		for face in faces:
-			f.write("f %d %d %d \n" % (face[0]+1, face[1]+1, face[2]+1))
+		print("writing faces...")
+		f.write(''.join(faceStrings))
 	print("Decimating Mesh...")
 	if os.name == 'nt':
 		s = 'binWindows\\simplify.exe ' + location[:-1] + '\\' + os.path.basename(stackname) +".obj " + location[:-1] + '\\' + os.path.basename(stackname) +".smooth.obj " + str(simplify)
+		return
 	else:
 		if platform.system() == "Darwin":
 			s = './binOSX/simplify ./' + location + os.path.basename(stackname) +".obj ./" + location + os.path.basename(stackname) +".smooth.obj " + str(simplify)
@@ -142,7 +148,6 @@ def getTagDictionary(stack):
 
 	return tagDict
 
-
 def main():
 	meshes = sys.argv[2]
 	simplify = sys.argv[3]
@@ -160,6 +165,7 @@ def main():
 			continue
 		print("Starting " + stack)
 		labelStack = tifffile.imread(stack)
+		#code.interact(local=locals())
 		tags = getTagDictionary(stack)
 		#labelStack = np.dstack(labelStack)
 		print("Loaded data stack " + str(ii) + "/" + str(len(labelsPaths)))
