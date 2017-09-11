@@ -75,14 +75,18 @@ def calcMeshWithCrop(stackname, labelStack, location, simplify, tags):
 	print(s)
 	subprocess.call(s, shell=True)
 
-def calcMesh(stackname, labelStack, location, simplify, tags):
+def calcMesh(stackname, labelStack, location, simplify):
+	tags = getTagDictionary(stackname)
+	downsampleFactor = float(tags['downsample_interval_x'])
+	xOffset = float(tags['dvid_offset_x'])
+	yOffset = float(tags['dvid_offset_y'])
+	zOffset = float(tags['dvid_offset_z'])
 	labelStack = np.swapaxes(labelStack, 0, 2)
 	print("Building mesh...")
 	vertices, normals, faces = march(labelStack, 3)  # 3 smoothing rounds
 	
 	print('preparing vertices and faces...')
-	newVerts = [[i[0], i[1], i[2]] for i in vertices]
-	vertStrings = ["v %.3f %.3f %.3f \n" % (i[0], i[1], i[2]) for i in newVerts]
+	vertStrings = ["v %.3f %.3f %.3f \n" % ((xOffset + i[0]) * downsampleFactor, (yOffset + i[1]) * downsampleFactor, (zOffset + i[2]) * downsampleFactor) for i in vertices]
 	faceStrings = ["f %d %d %d \n" % (face[2]+1, face[1]+1, face[0]+1) for face in faces]
 	with open(location + os.path.basename(stackname) +".obj", 'w') as f:
 		f.write("# OBJ file\n")
@@ -116,8 +120,7 @@ def calcMeshWithOffsets(stackname, labelStack, location, simplify):
 	vertices, normals, faces = march(labelStack, 3)  # 3 smoothing rounds
 	
 	print('preparing vertices and faces...')
-	newVerts = [[((xOffset + i[0]) * downsampleFactor),  ((yOffset + i[1]) * downsampleFactor), ((zOffset + i[2]) * downsampleFactor)] for i in vertices]
-	vertStrings = ["v %.3f %.3f %.3f \n" % (i[0]-1.0, i[1]-1.0, i[2]-1.0) for i in newVerts]
+	vertStrings = ["v %.3f %.3f %.3f \n" % ((xOffset + i[0]) * downsampleFactor, (yOffset + i[1]) * downsampleFactor, (zOffset + i[2]) * downsampleFactor) for i in vertices]
 	faceStrings = ["f %d %d %d \n" % (face[2]+1, face[1]+1, face[0]+1) for face in faces]
 	with open(location + os.path.basename(stackname) +".obj", 'w') as f:
 		f.write("# OBJ file\n")
@@ -165,14 +168,11 @@ def getTagDictionary(stack):
 	if 'downsample_interval_x' not in tagDict:
 		tagDict['downsample_interval_x'] = 1.0
 	if 'dvid_offset_x' not in tagDict:
-		print("Offset not found, bad TIFF, quitting.")
-		sys.exit()
+		tagDict['dvid_offset_x'] = 0.0
 	if 'dvid_offset_y' not in tagDict:
-		print("Offset not found, bad TIFF, quitting.")
-		sys.exit()
+		tagDict['dvid_offset_y'] = 0.0
 	if 'dvid_offset_z' not in tagDict:
-		print("Offset not found, bad TIFF, quitting.")
-		sys.exit()
+		tagDict['dvid_offset_z'] = 0.0
 
 	return tagDict
 
