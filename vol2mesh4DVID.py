@@ -1,4 +1,4 @@
-from marching_cubes import march
+﻿from marching_cubes import march
 import code
 import tifffile
 import numpy as np
@@ -199,7 +199,7 @@ def main():
 		print("Loaded data stack " + str(ii) + "/" + str(len(labelsPaths)))
 		print("Thresholding...")
 
-		calcMesh(stack, labelStack, meshes, simplify)
+		calcMeshWithOffsets(stack, labelStack, meshes, simplify)
 
 
 if __name__ == "__main__":
